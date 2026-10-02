@@ -1,0 +1,23 @@
+# DocPilot AI runs as a single container:
+#
+#   DocPilot FastAPI  ->  Gemini API  ->  MongoDB Atlas
+#
+# The Ollama container and the model init container are gone, so
+# nothing is downloaded at startup and no model runs locally.
+
+services:
+
+  rag-app:
+    build: .
+
+    container_name: rag-app
+
+    ports:
+      - "8000:8000"
+
+    # GEMINI_API_KEY and GEMINI_MODEL reach the container through
+    # this file. They are never baked into the image.
+    env_file:
+      - .env
+
+    restart: unless-stopped

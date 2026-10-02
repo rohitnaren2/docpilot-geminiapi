@@ -1,0 +1,40 @@
+RAG Application Setup GuideMongoDB Atlas + Ollama + Gemma 3 + LangChain
+This guide explains how to set up the Retrieval-Augmented Generation (RAG) application from scratch and the purpose of each component.
+1. Install Python
+Install Python 3.11 or later and verify with:python --version
+2. Install Ollama
+Download Ollama from https://ollama.com/download.Verify installation:ollama --versionOllama runs local LLMs on your machine.
+3. Download the LLM
+Run:ollama pull gemma3:4bGemma 3 is the language model that generates answers from retrieved context.
+4. Download the Embedding Model
+Run:ollama pull nomic-embed-textThis model converts both document chunks and user questions into vectors so semantic search is possible.
+5. Install Python Packages
+pip install langchain langchain-community langchain-core langchain-text-splitters langchain-ollama langchain-mongodb pymongo pypdf
+6. Configure MongoDB Atlas
+Create an M0 cluster, database user, allow network access, copy the connection string, then create:Database: singapore_pr_chunksCollection: chunked_data
+7. Create Vector Search Index
+Create a Vector Search index named 'vector_index'.Field: embeddingDimensions: 768Similarity: CosineWait until status is READY.
+{
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 768,
+      "similarity": "cosine"
+    }
+  ]
+}
+8. Configure key_param.py
+Create:MONGODB_URI='your connection string'
+9. Add PDF
+Place your PDF inside sample_files/.Example: sample_files/singpore_pr_details.pdf
+10. Run load_data.py
+This script loads the PDF, cleans it, splits it into chunks, generates embeddings using nomic-embed-text, and stores everything in MongoDB Atlas.
+11. Run rag.py
+Run:python rag.pyThe application converts the user's question into an embedding, retrieves the most relevant chunks from MongoDB Vector Search, builds a prompt, sends it to Gemma 3, and streams the answer.
+How RAG Works
+Flow:User Question -> Embedding Model -> MongoDB Vector Search -> Top Matching Chunks -> Prompt + Chat History -> Gemma 3 -> Final AnswerThe embedding model performs semantic search, MongoDB retrieves relevant chunks, and Gemma generates a grounded answer using only the retrieved context.
+Project Structure
+sample_files/load_data.pyrag.pykey_param.pyrequirements.txtREADME.md
+Useful Commands
+ollama pull gemma3:4bollama pull nomic-embed-textollama listpython load_data.pypython rag.py
